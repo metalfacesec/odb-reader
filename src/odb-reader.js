@@ -50,23 +50,16 @@ class ODBReader {
 			});
 		});
 	}
-	sendCommand(connection, command) {
+	sendCommand(connection, command, responseIdentifier, responseParser) {
+		// TODO: Need to remove the listener it isnt changing and is keeping the value constant of identifier
+		console.log("!!!!ID = " + responseIdentifier);
+		var ri = responseIdentifier;
+		console.log('!!!!clean res zplit1 = ' + ri + ' ');
 		return new Promise((resolve, reject) => {
+			console.log('!!!!clean res zplit2 = ' + ri + ' ');
 			let rez = '';
-			connection.on('data', (buffer) => {
-				rez += buffer.toString().trim();
-
-				if (JSON.stringify(buffer.toString()).includes('\r\n') || rez.includes('>')) {
-					let clean_rez = rez.replace(/\s+/g, '');
-
-					// Call appropriate pid callback
-					let real_clean = clean_rez.split('410C')[1].split('>')[0];
-
-                    resolve((parseInt(real_clean,16) / 4));
-
-					rez = '';
-				}
-			});
+			connection.removeListener('data');
+			connection.on('data', );
 			connection.write(new Buffer(command + '\r\n', 'utf-8'), function (err, count) {
 				if (err) {
 					return reject(err);
@@ -75,16 +68,14 @@ class ODBReader {
 		});
 	}
 	async start() {
-		let self = this;
 		while (true) {
 			for (let i = 0; i < this.enabledPIDs.length; i++) {
-				let rez = await self.sendCommand(command);
-				// let command = '';
-				// if (this.enabledPIDs[i] == 'rpm') {
-				// 	command = '010C';
-				// }
-				// let rez = await self.sendCommand(connection, command);
-				// console.log(rez);
+				let currentPID = this.enabledPIDs[i];
+				console.log(currentPID.responseIdentifier);
+				console.log('!!!!running with current identifier above on pid = ' + currentPID.name);
+				let rez = await this.sendCommand(this.btDeviceConnection, currentPID.command, currentPID.responseIdentifier, currentPID.responseParser);
+				
+				console.log('** ' + currentPID.name + " = " + rez + '' + currentPID.units);
 			}
 		}
 	}
