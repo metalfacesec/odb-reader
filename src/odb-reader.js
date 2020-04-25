@@ -51,15 +51,20 @@ class ODBReader {
 		});
 	}
 	sendCommand(connection, command, responseIdentifier, responseParser) {
+		let self = this;
+
 		// TODO: Need to remove the listener it isnt changing and is keeping the value constant of identifier
 		console.log("!!!!ID = " + responseIdentifier);
 		var ri = responseIdentifier;
 		console.log('!!!!clean res zplit1 = ' + ri + ' ');
+
+
 		return new Promise((resolve, reject) => {
-			console.log('!!!!clean res zplit2 = ' + ri + ' ');
 			let rez = '';
-			connection.removeListener('data');
-			connection.on('data', );
+			connection.on('data', data => {
+				console.log(data + '');
+				//console.log(self.enabledPIDs);
+			});
 			connection.write(new Buffer(command + '\r\n', 'utf-8'), function (err, count) {
 				if (err) {
 					return reject(err);
